@@ -23,8 +23,13 @@ Route::get('/home/timeline','DiscussionController@index')->name('timeline');
 Route::post('/home/creatediscussion','HomeController@creatediscussion');
 Route::post('/home/subscribeuser','HomeController@subscribeuser');
 Route::post('/home/followuser','HomeController@followuser');
-Route::post('/home/postcomment','HomeController@postcomment');
+Route::get('/postcomment','HomeController@postcomment');
 Route::post('/home/postlike','HomeController@postlike');
 Route::post('/home/loadcomments','HomeController@loadcomments');
+
+Route::get('/','FactController@index');
+Route::get('/facts','FactController@display_fact');
+Route::post('/facts/create','FactController@create');
+Route::get('/facts/home','FactController@return_home');
 
 

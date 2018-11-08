@@ -21,6 +21,9 @@
     },
     "dependencies": {
         "admin-lte": "^2.4.2",
-        "font-awesome": "^4.7.0"
+        "font-awesome": "^4.7.0",
+        "laravel-echo": "^1.4.0",
+        "mdbootstrap": "^4.5.13",
+        "pusher-js": "^4.3.1"
     }
 }

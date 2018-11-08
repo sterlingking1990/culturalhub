@@ -220,7 +220,7 @@ use \App\Http\Controllers\HomeController;
                 <img class="img-circle" src="storage/discussion_images/{!! App\User::findOrFail($discussion_detail->follow_id)->profile_pic !!}" alt="User Image">
             
                 <span class="username"><a href="#">{!! App\User::findOrFail($discussion_detail->follow_id)->name !!}</a></span>
-                <span class="description">Shared <strong>{{$discussion_detail->topic}}</strong> as it matters in <strong>{{implode(',',json_decode(($discussion_detail->tribes)))}}</strong> - 7:30 PM Today</span>
+                <span class="description">Shared <strong>{{$discussion_detail->topic}}</strong> as it matters in <strong>{{implode(',',json_decode(($discussion_detail->tribes)))}}</strong> - {{$discussion_detail->created_time}}</span>
               </div>
               <!-- /.user-block -->
             {{--   <div class="box-tools">
@@ -291,7 +291,7 @@ use \App\Http\Controllers\HomeController;
                 <div class="comment-text">
                       <span class="username">
                         {{$comment->name}}
-                        <span class="text-muted pull-right">8:03 PM Today</span>
+                        <span class="text-muted pull-right">{{$comment->created_at}}</span>
                       </span>
                   {{$comment->comments}}
                 </div>
@@ -302,14 +302,18 @@ use \App\Http\Controllers\HomeController;
             </div>
             <!-- /.box-footer -->
             <div class="box-footer">
-              {{Form::open(['action'=>['HomeController@postcomment'],'method'=>'POST'])}}
+             
                 <img class="img-responsive img-circle img-sm" src="storage/discussion_images/{{Auth::user()->profile_pic}}" alt="Alt Text">
                 <!-- .img-push is used to add margin to elements next to floating images -->
                 <div class="img-push">
-                  <input type="text" class="form-control input-sm" placeholder="Press enter to post comment" name="comment" id="comment">
-                  <input type="hidden" name="discussion_id" value="{{$discussion_detail->discussion_id}}">
+                  
+                  <input type="text" class="form-control input-sm" placeholder="Press enter to post comment" name="usercomment" id="user_comment"/>
+             
+                  <input type="hidden" id="discussion_id" name="discussion_id" value="{{$discussion_detail->discussion_id}}"/>
+                  <input type="hidden" name="comment_creator" id="comment_creator" value="{{Auth::user()->id}}"/>
+                  
                 </div>
-              {{Form::close()}}
+              
             </div>
             <!-- /.box-footer -->
           </div>

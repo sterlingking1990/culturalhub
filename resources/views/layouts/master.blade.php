@@ -15,7 +15,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
   <!-- If you'd like to support IE8 (for Video.js versions prior to v7) -->
   <script src="https://vjs.zencdn.net/ie8/ie8-version/videojs-ie8.min.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  {{-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script> --}}
+  <!--add jQuery -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 
@@ -191,29 +193,41 @@ function fetchDiscussions(){
 </script> --}}
 
 <script src="https://vjs.zencdn.net/7.2.3/video.js"></script>
-<script src="http://code.jquery.com/jquery-3.3.1.min.js"
-               integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-               crossorigin="anonymous">
-</script>
+
 <script>
-  jQuery(document).ready(function(){
-  jQuery('#comment_loader').click(function(e){
-    e.preventDefault();
-               $.ajaxSetup({
-                  headers: {
-                      'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
-                  }
-              });
-               jQuery.ajax({
-                method:"POST",
-                url:"{{url('/home/loadcomments')}}",
+  $(document).ready(function(){
+  $('#user_comment').keydown(function(event){
+    if(event.which==13){
+      event.preventDefault();
+      
+      var searchitem=$('#user_comment').val();
+      var comment_creator=$('#comment_creator').val();
+      var discussion_id=$('#discussion_id').val();
+      
+               $.ajax({
+                type:"GET",
+                url:"/postcomment",
+                
                 data:{
-                  discussion_id:$('#discussion_id').val()
+                  discussion_id:discussion_id,
+                  comment_created:searchitem,
+                  comment_creator:comment_creator
                 },
-                success:function(result){
-                  console.log(result);
-                }});
-             });
+                success:showComment
+              });
+               
+
+
+             }});
+
+    //describe the showComment function 
+    function showComment(data){
+      $.each(data,function(item){
+        $('#comments_loaded').append("<div class='box-comment'><img class='img-circle img-sm' src=" + 'storage/discussion_images/' + data[item]['profile_pic'] + "><div class='comment-text'><span class='username'>" + data[item]['name'] + "<span class='text-muted pull-right'>" + data[item]["created_at"] + "</span></span>" + data[item]["comments"]+ "</div></div>");
+        $('#user_comment').val("");
+
+      });
+    }
 });
   
 </script>

@@ -30,12 +30,10 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-            //display the discussion that the user who signed in is following, if he is not following any user yet, include his discussion still:::where topic_discussion.user_id = active user
-        //dd(CommentDiscussion::findOrFail(where('discussion_id','=',1))->comments);
-
+            
         $user_active=auth()->user()->id;
-        $users_following=DB::table('user_follows')->Join('topic_discussions','user_follows.follow_id','=','topic_discussions.user_id')->Join('topics','topics.id','topic_discussions.topic_id')->select('user_follows.*','topic_discussions.id as discussion_id','topic_discussions.*','topics.*')->where('user_follows.user_id','=',$user_active)->where('topic_discussions.available','=','unlocked')->get();
-        //dd($users_following);
+        $users_following=DB::table('user_follows')->Join('topic_discussions','user_follows.follow_id','=','topic_discussions.user_id')->Join('topics','topics.id','topic_discussions.topic_id')->select('user_follows.*','topic_discussions.id as discussion_id','topic_discussions.*','topics.*','topic_discussions.created_at as created_time')->where('user_follows.user_id','=',$user_active)->where('topic_discussions.available','=','unlocked')->get();
+        // dd($users_following);
         
 
         //get the total number of culture lovers following the follower this person is following
@@ -81,7 +79,7 @@ class HomeController extends Controller
         }
         else{
                 //this means the user isnt following some users, hence he should follow those who posted contents but the user isnt following this person;;;
-                $users_to_follow=DB::table('topic_discussions')->join('topics','topics.id','=','topic_discussions.topic_id')->join('users','users.id','=','topic_discussions.user_id')->where('topic_discussion.user_id','<>',$user_active)->select('users.name as name','users.id as id','topic_discussions.tribes as tribes','topics.topic as topic')->where('topic_discussions.available','<>','locked')->get();
+                $users_to_follow=DB::table('topic_discussions')->join('topics','topics.id','=','topic_discussions.topic_id')->join('users','users.id','=','topic_discussions.user_id')->where('topic_discussions.user_id','<>',$user_active)->select('users.name as name','users.id as id','topic_discussions.tribes as tribes','topics.topic as topic')->where('topic_discussions.available','<>','locked')->get();
             }
 
 
@@ -113,7 +111,7 @@ class HomeController extends Controller
             $tribes_available=DB::table('tribes')->get();
 
             //get the topics from the db
-            $topics_available=DB::table('topics')->get();
+            $topics_available=DB::table('topics')->distinct()->get();
 
 
 
@@ -201,6 +199,9 @@ class HomeController extends Controller
          $discussion->discussion_image=$filenametosave;
          $discussion->path_extension=$extension;
          $discussion->topic_body=$request->input('discuss');
+         $discussion->number_of_comments=0;
+         $discussion->likes=0;
+         $discussion->comments="Really nice post on culture";
 
 
          $discussion->topic_id=$request->input('topic');
@@ -222,8 +223,9 @@ class HomeController extends Controller
     
         }
         
+        $discussion->tribes=$discussion_tribe;
         // //check for tribe too
-        if(!empty($request->input('tribetag'))){
+        if((!empty($request->input('tribetag'))) && (!empty($discussion_tribe))){
 
             $tribenew = new Tribe;
             $tribenew->tribe_name=$request->input('tribetag');
@@ -236,18 +238,28 @@ class HomeController extends Controller
 
     
         }
+
         else{
-            $discussion->tribes=$discussion_tribe;
+            //either tribe or tribe tag is empty or both is empty; 
+            if(empty($discussion_tribe) && empty($request->input('tribetag'))){
+                //since both are empty, then let us save tribe as none selected
+                $discussion->tribes="none";
+            }
+            //seems the discussion_tribe is empty but the tribe tag isnt
+            if(empty($discussion_tribe) && (!empty($request->input('tribetag')))){
+                $tribenew = new Tribe;
+                $tribenew->tribe_name=$request->input('tribetag');
+                $tribenew->save();
+                $tribeid=(string)$tribenew->tribe_name;
+                $discussion->tribes=$tribeid;
+
+
+            }
+            
         }
-        
-
-
-
-
-
-
 
         $discussion->save();
+
         \Session::flash('discussion_created','Discussion successfully added.'); 
 
         return redirect('/home');
@@ -328,18 +340,43 @@ class HomeController extends Controller
     }
 
     public function postcomment(Request $request){
-        $comment=$request->input('comment');
-        $comment_creator=auth()->user()->id;
-        $discussion_id=$request->input('discussion_id');
+
+        // $comment=$request->input('comment');
+        // $comment_creator=auth()->user()->id;
+        // $discussion_id=$request->input('discussion_id');
+
+        //take input from ajax in master where ajax was described
+        $comments=$request->comment_created;
+
+
+        $discussion_id=$request->discussion_id;
+        
+        $comment_creator=$request->comment_creator;
 
         //save comment to 
-        DB::table('comment_discussions')->insert([
-            'discussion_id'=>$discussion_id,
-            'comments'=>$comment,
-            'user_id'=>$comment_creator,
-            'number_of_like'=>0]);
+        $discussion_comment=new CommentDiscussion;
+        $discussion_comment->discussion_id=$discussion_id;
+        $discussion_comment->comments=$comments;
+        $discussion_comment->user_id=$comment_creator;
+        $discussion_comment->number_of_like=0;
+        $discussion_comment->save();
 
-        return redirect('/home');
+        $discussion_id_new=(string)$discussion_comment->id;
+        //retrieve the comment being save using the comment id
+        //get the number of comments for this discussion id
+        // $comment_count=DB::table('topic_discussions')->select('number_of_comments')->where('id','=',$discussion_id)->get();
+        // $num_of_comments=$comment_count[0]->number_of_comments;
+            //get the comments now from the comments_discussion table
+              $data=DB::table('comment_discussions')->join('users','users.id','=','comment_discussions.user_id')->where('comment_discussions.id','=',$discussion_id_new)->get();
+            $response=$data;
+            //dd($response);
+        
+
+        //     return redirect('/home')->with('comments_made',$comments);
+
+         return \Response::json($response);
+
+        
     }
 
     public function loadcomments(Request $request){
@@ -418,6 +455,11 @@ class HomeController extends Controller
         return $comment_count;
         
         }
+
+    public function searchitem(Request $request){
+
+    }
+
 
 
 
