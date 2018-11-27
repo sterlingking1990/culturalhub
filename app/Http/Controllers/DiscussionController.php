@@ -24,13 +24,14 @@ class DiscussionController extends Controller
         $user_active=auth()->user()->id;
         $profile_pic=auth()->user()->profile_pic;
 
-        $timeline=DB::table('topic_discussions')->join('topics','topics.id','=','topic_discussions.topic_id')->join('users','users.id','topic_discussions.user_id')->where('topic_discussions.user_id','=',$user_active)->get();
+        $timeline=DB::table('topic_discussions')->join('topics','topics.id','=','topic_discussions.topic_id')->join('users','users.id','topic_discussions.user_id')->select('topic_discussions.id as discussion_id','topic_discussions.*','users.*','topics.*')->where('topic_discussions.user_id','=',$user_active)->get();
 
         $num_comments=DB::table('topic_discussions')->join('topics','topics.id','=','topic_discussions.topic_id')->join('comment_discussions','topic_discussions.id','=','comment_discussions.discussion_id')->select(DB::raw('count(*) as total_comments'))->where('topic_discussions.user_id','=',$user_active)->get()->first();
 
         //get all the comments made for the discussions made by the person the authenticated user is following
         $comments=DB::table('topic_discussions')->join('comment_discussions','topic_discussions.id','=','comment_discussions.discussion_id')->join('users','users.id','=','comment_discussions.user_id')->where('topic_discussions.user_id','=',$user_active)->get();
 
+       
         //dd($subscriptions);
 
         return view('timeline')->with([

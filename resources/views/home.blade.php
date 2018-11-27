@@ -4,7 +4,7 @@ use \App\Http\Controllers\HomeController;
 ?>
 
 @section('content')
-    <section class="content">
+    
       <!-- Small boxes (Stat box) -->   
         @if(Session::has('discussion_created'))
             <div class="alert alert-success"><em> {!! session('discussion_created') !!}</em></div>
@@ -114,16 +114,21 @@ use \App\Http\Controllers\HomeController;
           ?>
     </div>
 
+
+    
+
     <div class="row" style="margin-top: 10px;">
         <div class="col-lg-3 col-xs-6">
             <!-- Button trigger modal -->
             <p>
             <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal" style="padding-top: 10px;">
-              What matters today?
+              Share your culture?
             </button>
             </p>
         </div>
-    </div>
+  </div>
+
+  
 
             <!-- Modal -->
             <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -209,9 +214,12 @@ use \App\Http\Controllers\HomeController;
   
 
 
-    @foreach($discussion_details as $discussion_detail)
+   
     <div class="row">
-        <div class="col-md-6">
+             
+        <div class="col-md-6 col-md-3-offset">
+          @foreach($discussion_details as $discussion_detail)
+
           <!-- Box Comment -->
           <div class="box box-widget">
             <div class="box-header with-border">
@@ -268,13 +276,15 @@ use \App\Http\Controllers\HomeController;
               <p>{{$discussion_detail->topic_body}}</p>
               <span class="pull-left" style="padding-left: 5px;">
               <button type="button" class="btn btn-default btn-xs"><i class="fa fa-share"></i> Share</button>
-              {{Form::open(['action'=>['HomeController@postlike'],'method'=>'POST'])}}
-              <input type="hidden" name="discussion_id" value="{{$discussion_detail->discussion_id}}">
-              <button type="submit" class="btn btn-default btn-xs" name="like"><i class="fa fa-thumbs-o-up"></i> Like</button>
+              
+              <input type="hidden" id="discussion_id-{{$discussion_detail->discussion_id}}" value="{{$discussion_detail->discussion_id}}">
+              <button type="button" class="btn btn-default btn-xs likepost"  id="{{$discussion_detail->discussion_id}}"><i class="fa fa-thumbs-o-up"></i> Like</button>
 
-              {{Form::close()}}
+              
             </span>
+            <div id="like_and_comment_count-{{$discussion_detail->discussion_id}}">
               <span class="pull-right text-muted">{{$discussion_detail->likes}} likes - {{json_decode($comments_count[0]->comments_total)}} comments</span>
+            </div>
             </div>
             <!-- /.box-body -->
           {{--   {{Form::open(['action'=>['HomeController@loadcomments'],'method'=>'POST'])}}
@@ -282,7 +292,7 @@ use \App\Http\Controllers\HomeController;
                 <button class="btn btn-primary" id='comment_loader' type="submit" name="comments">{{$discussion_detail->number_of_comments > 0? "Load Comments":"No comments yet"}}</button>
                 <input type="hidden" name="discussion_id" value="{{$discussion_detail->discussion_id}}" id="discussion_id">
             {{Form::close()}} --}}
-            <div class="box-footer box-comments" id="comments_loaded">
+            <div class="box-footer box-comments" id="comments_loaded-{{$discussion_detail->discussion_id}}">
               <?php $all_comments=HomeController::get_comment_for_discussion($discussion_detail->discussion_id)  ?>
               @foreach($all_comments as $comment)   
               <div class="box-comment">
@@ -307,10 +317,11 @@ use \App\Http\Controllers\HomeController;
                 <!-- .img-push is used to add margin to elements next to floating images -->
                 <div class="img-push">
                   
-                  <input type="text" class="form-control input-sm" placeholder="Press enter to post comment" name="usercomment" id="user_comment"/>
+                  <input type="text" class="form-control input-sm commentpost" placeholder="Press enter to post comment" id="user_comment-{{$discussion_detail->discussion_id}}" {{-- id="{{$discussion_detail->discussion_id}}" --}} comment_prop="{{Auth::user()->id}}" prop="{{$discussion_detail->discussion_id}}"/>
              
-                  <input type="hidden" id="discussion_id" name="discussion_id" value="{{$discussion_detail->discussion_id}}"/>
-                  <input type="hidden" name="comment_creator" id="comment_creator" value="{{Auth::user()->id}}"/>
+                  <input type="hidden" id="discussion_id-{{$discussion_detail->discussion_id}}" name="discussion_id" value="{{$discussion_detail->discussion_id}}"/>
+                  <input type="hidden" name="comment_creator" />
+                 
                   
                 </div>
               
@@ -318,15 +329,15 @@ use \App\Http\Controllers\HomeController;
             <!-- /.box-footer -->
           </div>
           <!-- /.box -->
-        </div>
-        <!-- /.col -->
-    </div>
-    @endforeach
+          @endforeach
+          </div>
+          
+        
 
+        
 
-
-
-        <aside class="col-md-3 col-xs-6">
+      <!--add aside-->
+       <div class="col-md-3">
             <?php if(!empty($users_to_follow)) { ?>
             @foreach($users_to_follow as $follow_this_user)
             <div style="background-color: rgb(0, 167, 208)">
@@ -358,10 +369,19 @@ use \App\Http\Controllers\HomeController;
             <?php } ?>
 
 
-        </aside>
+        </div>
+      <!--end add aside -->
+        <!-- /.col -->
+    </div>
+    
+  
+
+
+
+       
       
 
-  </section>
+  
       <!-- /.
 
 @endsection

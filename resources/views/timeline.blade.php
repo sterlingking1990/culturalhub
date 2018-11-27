@@ -1,4 +1,7 @@
 @extends('layouts.master')
+<?php
+use \App\Http\Controllers\HomeController;
+?>
 
 @section('content')
     <section class="content">
@@ -9,8 +12,12 @@
 
 
 
-    
+   
+
     @foreach($discussion_details as $discussion_detail)
+    @if(empty($discussion_detail))
+    <p>Please upload content on what matters today in your culture or ask question about culture before accesing this page</p>
+    @endif
     <div class="row">
         <div class="col-md-6">
           <!-- Box Comment -->
@@ -62,21 +69,23 @@
             ?>
 
 
+            <?php $comments_count=HomeController::get_comment_count($discussion_detail->discussion_id) ?>
 
               <p>{{$discussion_detail->topic_body}}</p>
               <button type="button" class="btn btn-default btn-xs"><i class="fa fa-share"></i> Share</button>
               <button type="button" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-up"></i> Like</button>
-              <span class="pull-right text-muted">{{$discussion_detail->likes}} likes - {{$num_of_comments->total_comments}} comments</span>
+              <span class="pull-right text-muted">{{$discussion_detail->likes}} likes - {{json_decode($comments_count[0]->comments_total)}} comments</span>
             </div>
             <!-- /.box-body -->
-            <div class="box-footer box-comments">
+            <div class="box-footer box-comments" id="comments_loaded">
                 {{-- @if(is_array($comments_made || is_object($comments_made))) --}}
-                @foreach($comments_made as $comment)
+                <?php $all_comments=HomeController::get_comment_for_discussion($discussion_detail->discussion_id)  ?>
+                @foreach($all_comments as $comment)
 
 
               <div class="box-comment">
                 <!-- User image -->
-                <img class="img-circle img-sm" src="{{asset('storage/discussion_images/{$comment->profile_pic}')}}" alt="User Image">
+                <img class="img-circle img-sm" src={{URL::asset("storage/discussion_images/{$comment->profile_pic}")}} alt="User Image">
 
                 <div class="comment-text">
                       <span class="username">
@@ -94,13 +103,15 @@
             </div>
             <!-- /.box-footer -->
             <div class="box-footer">
-              <form action="#" method="post">
+              
                 <img class="img-responsive img-circle img-sm" src={{URL::asset("storage/discussion_images/{$profile_pic}")}} alt="Alt Text"/>
                 <!-- .img-push is used to add margin to elements next to floating images -->
                 <div class="img-push">
-                  <input type="text" class="form-control input-sm" placeholder="Press enter to post comment">
+                  <input type="text" id ="user_comment" class="form-control input-sm" placeholder="Press enter to post comment">
                 </div>
-              </form>
+                <input type="hidden" id="discussion_id" name="discussion_id" value="{{$discussion_detail->discussion_id}}"/>
+                <input type="hidden" name="comment_creator" id="comment_creator" value="{{Auth::user()->id}}"/>
+              
             </div>
             <!-- /.box-footer -->
           </div>

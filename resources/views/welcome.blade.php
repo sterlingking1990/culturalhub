@@ -282,7 +282,7 @@
                 <div class="title m-b-md" style="color:white;">
                     MYCULTURE.NG
                 </div>
-                <div style="margin-top: -40px;color:#4285f4;border-width: 2px;"><strong style="border-width: 2px;">culture as it matters</strong></div>
+                <div style="margin-top: -40px;color:#999cd4;border-width: 2px;"><strong style="border-width: 2px;"><p style="font-size: 20px";> connect to your culture</p></strong></div>
     
 
                 {{-- <div class="links">
@@ -315,7 +315,7 @@
                 </div>
             </div>
               
-             <p style="color:white;"><bold>Nnewi South | Awka North | Ibadan West | and many more </bold> <button class="btn btn-sm btn-primary" id="reloadpage">Return Home</button></p>
+             <p style="color:white;"><bold>Anambra | Enugu | Calabar | and many more </bold> <button class="btn btn-sm btn-primary" id="reloadpage">Return Home</button></p>
         </div>
     </div>
  
@@ -550,7 +550,7 @@ $('div.alert').not('.alert-success').delay(3000).fadeOut(350);
     $(function() {
         $('.infinite-scroll').jscroll({
             autoTrigger: true,
-            loadingHtml: '<img style="margin-left:700px;width:100px;height:100px;" src={{asset("/storage/discussion_images/loading.gif")}} alt="Loading..." />',
+            loadingHtml: '<img style="margin-left:700px;width:30px;height:30px;" src={{asset("/storage/discussion_images/loading.gif")}} alt="Loading..." />',
             padding: 0,
             nextSelector: '.pagination li.active + li a',
             contentSelector: 'div.infinite-scroll',

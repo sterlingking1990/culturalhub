@@ -113,7 +113,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <section class="content-header">
       <h1>
         CULTURAL HUB
-        <small>culture as it matters</small>
+        <small>connecting to your culture</small>
       </h1>
       <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
@@ -196,13 +196,15 @@ function fetchDiscussions(){
 
 <script>
   $(document).ready(function(){
-  $('#user_comment').keydown(function(event){
+  $('.commentpost').keydown(function(event){
+
     if(event.which==13){
-      event.preventDefault();
-      
-      var searchitem=$('#user_comment').val();
-      var comment_creator=$('#comment_creator').val();
-      var discussion_id=$('#discussion_id').val();
+
+     
+      var comment_creator=$(this).attr("comment_prop");
+      var discussion_id=$(this).attr("prop");
+      var searchitem=$('#user_comment-'+discussion_id).val();
+  
       
                $.ajax({
                 type:"GET",
@@ -222,14 +224,50 @@ function fetchDiscussions(){
 
     //describe the showComment function 
     function showComment(data){
-      $.each(data,function(item){
-        $('#comments_loaded').append("<div class='box-comment'><img class='img-circle img-sm' src=" + 'storage/discussion_images/' + data[item]['profile_pic'] + "><div class='comment-text'><span class='username'>" + data[item]['name'] + "<span class='text-muted pull-right'>" + data[item]["created_at"] + "</span></span>" + data[item]["comments"]+ "</div></div>");
-        $('#user_comment').val("");
-
-      });
+      
+        $('#comments_loaded-'+ data[1]).append("<div class='box-comment'><img class='img-circle img-sm' src=" + 'storage/discussion_images/' + data[0]['profile_pic'] + "><div class='comment-text'><span class='username'>" + data[0]['name'] + "<span class='text-muted pull-right'>" + data[0]["created_at"] + "</span></span>" + data[0]["comments"]+ "</div></div>");
+        $('#user_comment-'+ data[1]).val("");
     }
 });
   
+</script>
+<script>
+  $(document).ready(function(){
+      var counter=1;
+      
+      $('.likepost').on('click',function(){
+        var discussion_id = $(this).attr("id");
+      // $('#like_and_comment_count').empty();
+
+    $.ajax({
+      type:"GET",
+      url:"/likepost",
+      data:{num_of_like:counter,discussion_id:discussion_id},
+      success:updateLike
+    });
+
+    });
+
+     
+    
+    function updateLike(data){
+
+      $('#like_and_comment_count-'+ data[2]).empty();
+        // alert(data[0]["likes"]);
+        // alert(data[1]["comments_for_post"]);
+        $('#like_and_comment_count-'+data[2]).html("<span class='pull-right text-muted'>" +  data[0]["likes"]  + " likes " + data[1]["comments_for_post"] +  " comments</span>");
+      }
+
+      
+ 
+  });
+</script>
+
+<script>
+  function getDiscussionId(dis_id){
+    alert(dis_id);
+  }
+
 </script>
 
 </body>

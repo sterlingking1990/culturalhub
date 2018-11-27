@@ -367,8 +367,8 @@ class HomeController extends Controller
         // $comment_count=DB::table('topic_discussions')->select('number_of_comments')->where('id','=',$discussion_id)->get();
         // $num_of_comments=$comment_count[0]->number_of_comments;
             //get the comments now from the comments_discussion table
-              $data=DB::table('comment_discussions')->join('users','users.id','=','comment_discussions.user_id')->where('comment_discussions.id','=',$discussion_id_new)->get();
-            $response=$data;
+              $comments=DB::table('comment_discussions')->join('users','users.id','=','comment_discussions.user_id')->where('comment_discussions.id','=',$discussion_id_new)->orderBy('comment_discussions.id','DESC')->first();
+            $response=array($comments,$discussion_id);
             //dd($response);
         
 
@@ -444,6 +444,14 @@ class HomeController extends Controller
         $all_comments=DB::table('comment_discussions')->join('users','users.id','=','comment_discussions.user_id')->where('comment_discussions.discussion_id','=',$discussion_id)->get();
 
         return $all_comments;
+        /*or you do this
+        $data['all_comments']=...
+        $data['comments_count']=...
+        return 'comments_details'=>$data;
+
+        then on view you access as so:
+        $data['all_comments']->name $data['comments_count']->num_of_comment..
+        */
     }
 
     public static function get_comment_count($discussion_id){
@@ -456,8 +464,50 @@ class HomeController extends Controller
         
         }
 
+//the ajax that handles post like
+    public function likepost(Request $request){
+        //get the request parameters
+        $like_sent=$request->num_of_like;
+        $discussion_id=$request->discussion_id;
+
+
+        //get previous like 
+       
+
+        $previous_like=DB::table('topic_discussions')->select('likes')->where('id','=',$discussion_id)->get()->first();
+
+        //add like sent to previous like
+
+        $all_likes=$previous_like->likes + $like_sent;
+        
+
+
+        //update the like for the disucssion id
+
+        DB::table('topic_discussions')->where('id','=',$discussion_id)->update(['likes'=>$all_likes]);
+
+        //fetch the number of like for the discussion id and also number of comment
+
+        $like_count=DB::table('topic_discussions')->select('likes')->where('id','=',$discussion_id)->get()->first();
+        
+        $comment_count=DB::table('comment_discussions')->select(DB::raw('count(*) as comments_for_post'))->where('discussion_id','=',$discussion_id)->get()->first();
+        $discussion_id=$discussion_id;
+        $response=array($like_count,$comment_count,$discussion_id);
+        
+
+
+       
+        return \Response::json($response);
+
+
+    }
+
     public function searchitem(Request $request){
 
+    }
+
+    public function showlanding(){
+        return view('landing');
     }
 
 
